@@ -1,37 +1,51 @@
-## Welcome to GitHub Pages
+# Laravel Blade Lint
 
-You can use the [editor on GitHub](https://github.com/Magentron/laravel-blade-lint/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+[![Laravel 5.4](https://img.shields.io/badge/Laravel-5.4-green.svg)](https://github.com/laravel/framework)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Laravel console command to check syntax of blade templates.
 
-### Markdown
+# Requirements
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+Perhaps it works with lesser versions as well, but this is untested.
 
-```markdown
-Syntax highlighted code block
+- PHP 5.6 or above
+- Laravel 5.4 or above
 
-# Header 1
-## Header 2
-### Header 3
+# Installation
 
-- Bulleted
-- List
+Add package via composer:
 
-1. Numbered
-2. List
+    composer require magentron/laravel-blade-lint
 
-**Bold** and _Italic_ and `Code` text
+For Laravel version < 5.5, edit `config/app.php`, add the following to
+the `providers` array:
 
-[Link](url) and ![Image](src)
-```
+    Magentron\BladeLinter\Providers\ServiceProvider::class,
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+# Usage
 
-### Jekyll Themes
+From the command line, run:
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Magentron/laravel-blade-lint/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+    php artisan blade:lint
 
-### Support or Contact
+You can use different levels of verbosity for somewhat more detailed
+information.
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+# Author
+ 
+[Jeroen Derks](https://www.phpfreelancer.nl), a.k.a [Magentron](https://github.com/Magentron)
+
+# License
+
+Laravel Blade Lint is free software: you can redistribute it and/or
+modify it under the terms of the GNU General Public License as published
+by the Free Software Foundation, either version 3 of the License, or (at
+your option) any later version.
+
+Laravel Blade Lint is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License along
+with Laravel Blade Lint.  If not, see <http://www.gnu.org/licenses/>.
