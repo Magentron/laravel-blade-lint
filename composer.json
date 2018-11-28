@@ -24,8 +24,8 @@
 		}
 	},
 	"extra": {
-		"laravel": {
+		"laravel": [
 			"Magentron\\BladeLint\\Providers\\ServiceProvider"
-		}
+		]
 	}
 }
