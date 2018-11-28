@@ -4,7 +4,7 @@
     "type": "library",
 	"keywords": ["laravel","blade","lint","console"],
 	"homepage": "https://github.com/Magentron/laravel-blade-lint",
-	"time": "2018-05-20 15:35:04",
+	"time": "2018-11-28 14:07:44",
     "license": "GPL-3.0-or-later",
     "authors": [
         {
@@ -21,6 +21,11 @@
 	"autoload": {
 		"psr-4": {
 			"Magentron\\BladeLint\\": "src/"
+		}
+	},
+	"extra": {
+		"laravel": {
+			"Magentron\\BladeLint\\Providers\\ServiceProvider"
 		}
 	}
 }
