@@ -1,6 +1,9 @@
 # Laravel Blade Lint
 
 [![Laravel 5.4](https://img.shields.io/badge/Laravel-5.4-green.svg)](https://github.com/laravel/framework)
+[![Laravel 5.5](https://img.shields.io/badge/Laravel-5.5-green.svg)](https://github.com/laravel/framework)
+[![Laravel 5.6](https://img.shields.io/badge/Laravel-5.6-green.svg)](https://github.com/laravel/framework)
+[![Laravel 5.7](https://img.shields.io/badge/Laravel-5.7-green.svg)](https://github.com/laravel/framework)
 
 Laravel console command to check syntax of blade templates.
 
