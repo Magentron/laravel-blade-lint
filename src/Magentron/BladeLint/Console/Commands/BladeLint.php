@@ -113,17 +113,14 @@ class BladeLint extends Command
      */
     protected function checkBladeSyntaxFiles(array $blades)
     {
-        // create temporary file
-        $temporaryFile = $this->getTemporaryFile();
-
         // determine maximum length of path names
         $maxLength = array_reduce($blades, function ($maxLength, $item) {
-                $length = strlen($item);
-                if ($length > $maxLength) {
-                    return $length;
-                }
-                return $maxLength;
-            });
+            $length = strlen($item);
+            if ($length > $maxLength) {
+                return $length;
+            }
+            return $maxLength;
+        });
 
         // foreach blade template saved compiled version to temporary file and run PHP syntax checker
         $errorCount           = 0;
@@ -132,11 +129,10 @@ class BladeLint extends Command
         $doListFiles          = OutputInterface::VERBOSITY_VERBOSE < $verbosityLevel;
         $writeNewlineFunction = $doListFiles ? 'writeln' : 'write';
 
-        foreach ($blades as $file)
-        {
+        foreach ($blades as $file) {
             $length         = $maxLength - strlen($file);
             $message        = sprintf("Compiling %s ...%s%s\r", $file, str_repeat(' ', $length), str_repeat("\x8", $length));
-            $messageLength = strlen($message) - 1;
+            $messageLength  = strlen($message) - 1;
 
             if ($maxMessageLength < $messageLength) {
                 $maxMessageLength = $messageLength;
@@ -144,19 +140,13 @@ class BladeLint extends Command
 
             $this->output->{$writeNewlineFunction}($message, false, OutputInterface::VERBOSITY_VERBOSE);
 
-            // compile the file and save it to the temporary file
-            file_put_contents($temporaryFile, Blade::compileString(file_get_contents($file)));
+            // compile the file and send it to the linter process
+            $compiled = Blade::compileString(file_get_contents($file));
 
-            // run PHP lint on the temporary file
-            $output  = null;
-            $return  = null;
-            $command = sprintf('php -l %s 2>&1', escapeshellarg($temporaryFile));
-            exec($command, $output, $return);
-            if (0 !== $return) {
-                $message = str_replace($temporaryFile, $file, trim($output[0]));
+            if (! $this->lint($compiled, $output, $error)) {
                 ++$errorCount;
-
-                $this->error($message, OutputInterface::VERBOSITY_QUIET);
+                $error = str_replace("Standard input code", $file->getPathname(), rtrim($error));
+                $this->error($error, OutputInterface::VERBOSITY_QUIET);
                 $maxMessageLength = 0;
             }
         }
@@ -169,21 +159,42 @@ class BladeLint extends Command
     }
 
     /**
-     * Get a single temporary file which will be deleted at the end of script execution.
+     * Lint the given PHP code.
      *
-     * @return string
+     * @param  string    $code    the code you want to
+     * @param  string  & $stdout the output produced by PHP internal linter
+     * @param  string  & $stderr the errors procuced by PHP internal linter
+     * @return boolean
      */
-    protected function getTemporaryFile()
+    protected function lint(string $code, ?string &$stdout = "", ?string &$stderr = ""): bool
     {
-        // create temporary file
-        $temporaryFile = tempnam(sys_get_temp_dir(), 'blade.lint.' . getmypid() . '.php.');
+        $descriptorspec = [
+            0 => ["pipe", "r"], // read from stdin
+            1 => ["pipe", "w"], // write to stdout
+            2 => ["pipe", "w"], // write to stderr
+        ];
 
-        // remove it at the end of script execution
-        register_shutdown_function(function() use ($temporaryFile) {
-            // remove the temporary file
-            @unlink($temporaryFile);
-        });
+        // open linter process (php -l)
+        $process = proc_open('php -l', $descriptorspec, $pipes);
 
-        return $temporaryFile;
+        if (! is_resource($process)) {
+            throw new \RuntimeException("unable to open process 'php -l'");
+        }
+
+        fwrite($pipes[0], $code);
+        fclose($pipes[0]);
+
+        $stdout = stream_get_contents($pipes[1]);
+        fclose($pipes[1]);
+
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[2]);
+
+        // it is important that you close any pipes before calling
+        // +proc_close in order to avoid a deadlock
+        $retval = proc_close($process);
+
+        // zero actually means "no error"
+        return $retval == "0";
     }
 }
