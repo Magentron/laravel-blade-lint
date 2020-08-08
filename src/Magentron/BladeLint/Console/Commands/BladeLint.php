@@ -29,7 +29,7 @@ class BladeLint extends Command
      *
      * @var string
      */
-    protected $signature = 'blade:lint';
+    protected $signature = 'blade:lint {path?*}';
 
     /**
      * The console command description.
@@ -75,7 +75,7 @@ class BladeLint extends Command
         // get view directories
         $blades         = [];
         $files          = [];
-        $paths          = config('view.paths');
+        $paths          = $this->argument('path') ?: config('view.paths');
         $verbosityLevel = $this->getOutput()->getVerbosity();
 
         if (OutputInterface::VERBOSITY_VERBOSE < $verbosityLevel) {
@@ -87,7 +87,7 @@ class BladeLint extends Command
         // get all files in view directories
         foreach ($paths as $path) {
             $this->output->write(' - ' . $path, true, OutputInterface::VERBOSITY_VERY_VERBOSE);
-            $files = array_merge($files, File::allFiles($path));
+            $files = array_merge($files, is_file($path) ? [$path] : File::allFiles($path));
         }
         if (OutputInterface::VERBOSITY_VERBOSE === $verbosityLevel) {
             $this->output->writeln('', OutputInterface::VERBOSITY_VERBOSE);
