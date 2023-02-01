@@ -29,7 +29,9 @@ class BladeLint extends Command
      *
      * @var string
      */
-    protected $signature = 'blade:lint {path?*}';
+    protected $signature = 'blade:lint
+                             {--debug : Enable debug output, which consists of the compiled templates (PHP code)}
+                             {path?*}';
 
     /**
      * The console command description.
@@ -142,10 +144,13 @@ class BladeLint extends Command
 
             // compile the file and send it to the linter process
             $compiled = Blade::compileString(file_get_contents($file));
+            if ($this->input->getOption('debug')) {
+                $this->comment($compiled, OutputInterface::VERBOSITY_QUIET);
+            }
 
             if (! $this->lint($compiled, $output, $error)) {
                 ++$errorCount;
-                $error = str_replace("Standard input code", $file->getPathname(), rtrim($error));
+                $error = str_replace("Standard input code", $file, rtrim($error));
                 $this->error($error, OutputInterface::VERBOSITY_QUIET);
                 $maxMessageLength = 0;
             }

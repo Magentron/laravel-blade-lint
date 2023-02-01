@@ -1,9 +1,11 @@
 # Laravel Blade Lint
 
-[![Laravel 5.7](https://img.shields.io/badge/Laravel-5.7-green.svg)](https://github.com/laravel/framework/tree/5.7)
-[![Laravel 5.6](https://img.shields.io/badge/Laravel-5.6-green.svg)](https://github.com/laravel/framework/tree/5.6)
-[![Laravel 5.5](https://img.shields.io/badge/Laravel-5.5-green.svg)](https://github.com/laravel/framework/tree/5.5)
-[![Laravel 5.4](https://img.shields.io/badge/Laravel-5.4-green.svg)](https://github.com/laravel/framework/tree/5.4)
+[![Laravel 10.x](https://img.shields.io/badge/Laravel-10.x-green.svg)](https://github.com/laravel/framework/tree/10.x)
+[![Laravel 9.x](https://img.shields.io/badge/Laravel-9.x-green.svg)](https://github.com/laravel/framework/tree/9.x)
+[![Laravel 8.x](https://img.shields.io/badge/Laravel-8.x-green.svg)](https://github.com/laravel/framework/tree/8.x)
+[![Laravel 7.x](https://img.shields.io/badge/Laravel-7.x-green.svg)](https://github.com/laravel/framework/tree/7.x)
+[![Laravel 6.x](https://img.shields.io/badge/Laravel-6.x-green.svg)](https://github.com/laravel/framework/tree/6.x)
+[![Laravel 5.x](https://img.shields.io/badge/Laravel-5.x-green.svg)](https://github.com/laravel/framework/tree/5.8)
 
 Laravel console command to check syntax of blade templates.
 
@@ -18,7 +20,7 @@ Perhaps it works with lesser versions as well, but this is untested.
 
 Add package via composer:
 
-    composer require magentron/laravel-blade-lint
+    composer require --dev magentron/laravel-blade-lint
 
 For Laravel version < 5.5, edit `config/app.php`, add the following to
 the `providers` array:
