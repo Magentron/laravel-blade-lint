@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright (c) 2017-2018 Derks.IT / Jeroen Derks <jeroen@derks.it> All rights reserved.
+ * Copyright (c) 2017-2018,2023 Derks.IT / Jeroen Derks <jeroen@derks.it> All rights reserved.
  * Unauthorized copying of this file, via any medium is strictly prohibited.
  * Proprietary and confidential.
  *
@@ -12,9 +12,11 @@
 
 namespace Magentron\BladeLint\Console\Commands;
 
+use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\File;
-use Illuminate\Console\Command;
+use RuntimeException;
+use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -30,7 +32,8 @@ class BladeLint extends Command
      * @var string
      */
     protected $signature = 'blade:lint
-                             {--debug : Enable debug output, which consists of the compiled templates (PHP code)}
+                             {--debug            : Enable debug output, which consists of the compiled templates (PHP code)}
+                             {--p|processes=auto : The number of test processes to run.}
                              {path?*}';
 
     /**
@@ -47,10 +50,10 @@ class BladeLint extends Command
      */
     public function handle()
     {
-        $this->info('Blade Lint by Jeroen Derks Copyright © 2017-2018 GPLv3+ License');
+        $this->info('Blade Lint by Jeroen Derks Copyright © 2017-2018,2023 GPLv3+ License');
 
         // get blade files
-        $blades  = $this->getBladeFiles();
+        $blades  = $this->getBladeFileSizes();
         $count   = count($blades);
         $message = sprintf('Found %u blade templates, processing now...', $count);
         $this->info($message, OutputInterface::VERBOSITY_VERBOSE);
@@ -72,7 +75,7 @@ class BladeLint extends Command
      *
      * @return array
      */
-    protected function getBladeFiles()
+    protected function getBladeFileSizes()
     {
         // get view directories
         $blades         = [];
@@ -87,6 +90,7 @@ class BladeLint extends Command
         }
 
         // get all files in view directories
+        /** @var SplFileInfo[] $files */
         foreach ($paths as $path) {
             $this->output->write(' - ' . $path, true, OutputInterface::VERBOSITY_VERY_VERBOSE);
             $files = array_merge($files, is_file($path) ? [$path] : File::allFiles($path));
@@ -98,8 +102,14 @@ class BladeLint extends Command
         // get blade templates
         $this->output->write('Determining blade files...', false, OutputInterface::VERBOSITY_VERBOSE);
         foreach ($files as $file) {
+            // ensure the file is a string
+            if ($file instanceof SplFileInfo) {
+                $file = $file->getPathname();
+            }
+
             if ('.blade.php' === substr(strtolower(File::basename($file)), -10)) {
-                $blades[] = $file;
+                $stat = stat($file);
+                $blades[$file] = empty($stat) ? 0 : $stat[7];
             }
         }
         $this->output->writeln('', OutputInterface::VERBOSITY_VERBOSE);
@@ -111,16 +121,17 @@ class BladeLint extends Command
      * Check syntax of blade files.
      *
      * @param  array   $blades
-     * @return integer         Number of files with syntax errors.
+     * @return int   Number of files with syntax errors.
      */
     protected function checkBladeSyntaxFiles(array $blades)
     {
         // determine maximum length of path names
-        $maxLength = array_reduce($blades, function ($maxLength, $item) {
+        $maxLength = array_reduce(array_keys($blades), function ($maxLength, $item) {
             $length = strlen($item);
             if ($length > $maxLength) {
                 return $length;
             }
+
             return $maxLength;
         });
 
@@ -131,28 +142,30 @@ class BladeLint extends Command
         $doListFiles          = OutputInterface::VERBOSITY_VERBOSE < $verbosityLevel;
         $writeNewlineFunction = $doListFiles ? 'writeln' : 'write';
 
-        foreach ($blades as $file) {
-            $length         = $maxLength - strlen($file);
-            $message        = sprintf("Compiling %s ...%s%s\r", $file, str_repeat(' ', $length), str_repeat("\x8", $length));
-            $messageLength  = strlen($message) - 1;
+        foreach ($this->splitBladesIntoChunks($blades) as $chunkBlades) {
+            foreach ($chunkBlades as $file) {
+                $length         = $maxLength - strlen($file);
+                $message        = sprintf("Compiling %s ...%s%s\r", $file, str_repeat(' ', $length), str_repeat("\x8", $length));
+                $messageLength  = strlen($message) - 1;
 
-            if ($maxMessageLength < $messageLength) {
-                $maxMessageLength = $messageLength;
-            }
+                if ($maxMessageLength < $messageLength) {
+                    $maxMessageLength = $messageLength;
+                }
 
-            $this->output->{$writeNewlineFunction}($message, false, OutputInterface::VERBOSITY_VERBOSE);
+                $this->output->{$writeNewlineFunction}($message, false, OutputInterface::VERBOSITY_VERBOSE);
 
-            // compile the file and send it to the linter process
-            $compiled = Blade::compileString(file_get_contents($file));
-            if ($this->input->getOption('debug')) {
-                $this->comment($compiled, OutputInterface::VERBOSITY_QUIET);
-            }
+                // compile the file and send it to the linter process
+                $compiled = Blade::compileString(file_get_contents($file));
+                if ($this->input->getOption('debug')) {
+                    $this->comment($compiled, OutputInterface::VERBOSITY_QUIET);
+                }
 
-            if (! $this->lint($compiled, $output, $error)) {
-                ++$errorCount;
-                $error = str_replace("Standard input code", $file, rtrim($error));
-                $this->error($error, OutputInterface::VERBOSITY_QUIET);
-                $maxMessageLength = 0;
+                if (! $this->lint($compiled, $output, $error)) {
+                    ++$errorCount;
+                    $error = str_replace('Standard input code', $file, rtrim($error));
+                    $this->error($error, OutputInterface::VERBOSITY_QUIET);
+                    $maxMessageLength = 0;
+                }
             }
         }
 
@@ -164,26 +177,55 @@ class BladeLint extends Command
     }
 
     /**
+     * Split the files into chunks to be process per CPU core.
+     *
+     * @param  array $blades
+     * @return array
+     */
+    protected function splitBladesIntoChunks(array $blades)
+    {
+        // determine the number of processes
+        $processes = $this->option('processes');
+        if (is_numeric($processes)) {
+            settype($processes, 'integer');
+        } else {
+            $processes = null;
+        }
+        if (0 >= $processes) {
+            $processes = $this->getNumberOfCores();
+        }
+
+        $chunks = [];
+
+        asort($blades, SORT_NUMERIC);
+        foreach (array_keys($blades) as $index => $file) {
+            $chunks[$index % $processes][] = $file;
+        }
+
+        return $chunks;
+    }
+
+    /**
      * Lint the given PHP code.
      *
-     * @param  string    $code    the code you want to
-     * @param  string  & $stdout the output produced by PHP internal linter
-     * @param  string  & $stderr the errors procuced by PHP internal linter
-     * @return boolean
+     * @param string      $code   The PHP code you want to lint.
+     * @param string|null $stdout The output produced by PHP internal linter.
+     * @param string|null $stderr The errors produced by PHP internal linter.
+     * @return bool
      */
-    protected function lint(string $code, ?string &$stdout = "", ?string &$stderr = ""): bool
+    protected function lint(string $code, string &$stdout = null, string &$stderr = null)
     {
         $descriptorspec = [
-            0 => ["pipe", "r"], // read from stdin
-            1 => ["pipe", "w"], // write to stdout
-            2 => ["pipe", "w"], // write to stderr
+            0 => ['pipe', 'r'], // read from stdin
+            1 => ['pipe', 'w'], // write to stdout
+            2 => ['pipe', 'w'], // write to stderr
         ];
 
         // open linter process (php -l)
         $process = proc_open('php -l', $descriptorspec, $pipes);
 
         if (! is_resource($process)) {
-            throw new \RuntimeException("unable to open process 'php -l'");
+            throw new RuntimeException('unable to open process \'php -l\'');
         }
 
         fwrite($pipes[0], $code);
@@ -199,7 +241,50 @@ class BladeLint extends Command
         // +proc_close in order to avoid a deadlock
         $retval = proc_close($process);
 
-        // zero actually means "no error"
-        return $retval == "0";
+        // zero exit code means no error
+        return 0 === $retval;
+    }
+
+    /**
+     * Determine the number of CPU cores, if possible.
+     *
+     * @return int
+     *
+     * @see https://gist.github.com/ezzatron/1321581
+     */
+    protected function getNumberOfCores()
+    {
+        if (is_file('/proc/cpuinfo')) {
+            $cpuinfo = file_get_contents('/proc/cpuinfo');
+            if (preg_match_all('/^processor/m', $cpuinfo, $matches)) {
+                return count($matches[0]);
+            }
+        } elseif ('WIN' == strtoupper(substr(PHP_OS, 0, 3))) {
+            $process = @popen('wmic cpu get NumberOfCores', 'rb');
+            if (false !== $process) {
+                fgets($process);
+                $numCpus = intval(fgets($process));
+
+                pclose($process);
+
+                return $numCpus;
+            }
+        } elseif ('Darwin' === PHP_OS) {
+            return (int)system('sysctl -n hw.ncpu');
+        } else {
+            $process = @popen('sysctl -a', 'rb');
+            if (false !== $process) {
+                $output = stream_get_contents($process);
+
+                pclose($process);
+
+                if (preg_match('/hw.ncpu: (\d+)/', $output, $matches)) {
+                    return intval($matches[1][0]);
+                }
+            }
+        }
+
+        // if undetectable, just use 1 core
+        return 1;
     }
 }

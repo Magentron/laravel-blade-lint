@@ -15,9 +15,18 @@
         }
     ],
     "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
+		"ext-pcntl": "*",
 		"laravel/framework": "*"
 	},
+    "require-dev": {
+        "barryvdh/laravel-ide-helper": "*",
+        "friendsofphp/php-cs-fixer": "*",
+        "phpstan/phpstan": "*",
+        "sebastian/phpcpd": "*",
+        "vimeo/psalm": "*"
+    },
 	"autoload": {
 		"psr-4": {
 			"Magentron\\BladeLint\\": "src/Magentron/BladeLint"
@@ -29,5 +38,14 @@
 				"Magentron\\BladeLint\\Providers\\ServiceProvider"
 			]
 		}
-	}
+	},
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "treeware/plant": true,
+            "php-http/discovery": true
+        }
+    }
 }
