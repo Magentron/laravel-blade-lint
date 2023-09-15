@@ -1,12 +1,16 @@
 # Laravel Blade Lint
 
+[![Latest Stable Version](http://poser.pugx.org/magentron/laravel-blade-lint/v)](https://packagist.org/packages/magentron/laravel-blade-lint)
+[![Total Downloads](http://poser.pugx.org/magentron/laravel-blade-lint/downloads)](https://packagist.org/packages/magentron/laravel-blade-lint)
+[![License](http://poser.pugx.org/magentron/laravel-blade-lint/license)](https://packagist.org/packages/magentron/laravel-blade-lint)
+[![StyleCI](https://github.styleci.io/repos/134142812/shield)](https://github.styleci.io/repos/134142812)
+<br>
 [![Laravel 10.x](https://img.shields.io/badge/Laravel-10.x-green.svg)](https://github.com/laravel/framework/tree/10.x)
 [![Laravel 9.x](https://img.shields.io/badge/Laravel-9.x-green.svg)](https://github.com/laravel/framework/tree/9.x)
 [![Laravel 8.x](https://img.shields.io/badge/Laravel-8.x-green.svg)](https://github.com/laravel/framework/tree/8.x)
 [![Laravel 7.x](https://img.shields.io/badge/Laravel-7.x-green.svg)](https://github.com/laravel/framework/tree/7.x)
 [![Laravel 6.x](https://img.shields.io/badge/Laravel-6.x-green.svg)](https://github.com/laravel/framework/tree/6.x)
 [![Laravel 5.x](https://img.shields.io/badge/Laravel-5.x-green.svg)](https://github.com/laravel/framework/tree/5.8)
-[![StyleCI](https://github.styleci.io/repos/134142812/shield)](https://github.styleci.io/repos/134142812)
 
 Laravel console command to check syntax of blade templates.
 
