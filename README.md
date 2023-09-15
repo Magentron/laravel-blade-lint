@@ -6,6 +6,7 @@
 [![Laravel 7.x](https://img.shields.io/badge/Laravel-7.x-green.svg)](https://github.com/laravel/framework/tree/7.x)
 [![Laravel 6.x](https://img.shields.io/badge/Laravel-6.x-green.svg)](https://github.com/laravel/framework/tree/6.x)
 [![Laravel 5.x](https://img.shields.io/badge/Laravel-5.x-green.svg)](https://github.com/laravel/framework/tree/5.8)
+[![StyleCI](https://github.styleci.io/repos/134142812/shield)](https://github.styleci.io/repos/134142812)
 
 Laravel console command to check syntax of blade templates.
 
