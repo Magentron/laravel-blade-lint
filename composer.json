@@ -23,6 +23,7 @@
     "require-dev": {
         "barryvdh/laravel-ide-helper": "*",
         "friendsofphp/php-cs-fixer": "*",
+        "phpmd/phpmd": "*",
         "phpstan/phpstan": "*",
         "sebastian/phpcpd": "*",
         "vimeo/psalm": "*"

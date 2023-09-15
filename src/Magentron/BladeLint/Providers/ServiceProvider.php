@@ -17,7 +17,7 @@ use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 class ServiceProvider extends BaseServiceProvider
 {
     /**
-     * @var array
+     * @var string[]
      */
     protected $commands = [
         'Magentron\BladeLint\Console\Commands\BladeLint',
