@@ -19,9 +19,9 @@ class ServiceProvider extends BaseServiceProvider
     /**
      * @var string[]
      */
-    protected $commands = [
+    protected $commands = array(
         'Magentron\BladeLint\Console\Commands\BladeLint',
-    ];
+    );
 
     /**
      * Register the service provider.

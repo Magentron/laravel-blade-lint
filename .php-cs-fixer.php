@@ -24,7 +24,7 @@ $config
         'array_indentation'       => true,
 
         'array_syntax' => [
-            'syntax' => 'short',
+            'syntax' => 'long',
         ],
 
         'binary_operator_spaces'  => [

@@ -11,10 +11,10 @@ enabled:
   - alpha_ordered_imports
   - integer_literal_case
   - laravel_braces
-  - laravel_phpdoc_alignment
   - long_array_syntax
   - no_empty_comment
   - no_extra_consecutive_blank_lines
+  - phpdoc_align
 
 disabled:
   #- align_double_arrow

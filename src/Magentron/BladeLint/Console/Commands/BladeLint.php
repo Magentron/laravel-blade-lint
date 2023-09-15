@@ -51,7 +51,7 @@ class BladeLint extends Command
      *
      * @var int[]
      */
-    protected $workerPids = [];
+    protected $workerPids = array();
 
     /**
      * Execute the console command.
@@ -91,12 +91,12 @@ class BladeLint extends Command
     {
         // get view directories
         /** @var SplFileInfo[] $files */
-        $files = [];
+        $files = array();
 
         /** @var string[] $paths */
         $paths = $this->argument('path') ?: config('view.paths');
 
-        $blades         = [];
+        $blades         = array();
         $verbosityLevel = $this->getOutput()->getVerbosity();
 
         if (OutputInterface::VERBOSITY_VERBOSE < $verbosityLevel) {
@@ -108,7 +108,7 @@ class BladeLint extends Command
         // get all files in view directories
         foreach ($paths as $path) {
             $this->output->write(' - ' . $path, true, OutputInterface::VERBOSITY_VERY_VERBOSE);
-            $files = array_merge($files, is_file($path) ? [$path] : File::allFiles($path));
+            $files = array_merge($files, is_file($path) ? array($path) : File::allFiles($path));
         }
         if (OutputInterface::VERBOSITY_VERBOSE === $verbosityLevel) {
             $this->output->writeln('', OutputInterface::VERBOSITY_VERBOSE);
@@ -153,10 +153,10 @@ class BladeLint extends Command
         $chunkedBlades = $this->splitBladesIntoChunks($blades);
         $processCount  = count($chunkedBlades);
 
-        $flags = [
+        $flags = array(
             '--processes' => 1,
             '--quiet'     => true,
-        ];
+        );
 
         /** @var string $commandName */
         $commandName = $this->getName();
@@ -255,11 +255,11 @@ class BladeLint extends Command
      */
     protected function lint($code, &$stdout, &$stderr)
     {
-        $descriptorspec = [
-            0 => ['pipe', 'r'], // read from stdin
-            1 => ['pipe', 'w'], // write to stdout
-            2 => ['pipe', 'w'], // write to stderr
-        ];
+        $descriptorspec = array(
+            0 => array('pipe', 'r'), // read from stdin
+            1 => array('pipe', 'w'), // write to stdout
+            2 => array('pipe', 'w'), // write to stderr
+        );
 
         // open linter process (php -l)
         $process = proc_open('php -l', $descriptorspec, $pipes);
@@ -299,7 +299,7 @@ class BladeLint extends Command
         asort($blades, SORT_NUMERIC);
 
         // divide the files over max. $processes chunks
-        $chunks = [];
+        $chunks = array();
         foreach (array_keys($blades) as $index => $file) {
             $chunks[$index % $processCount][] = $file;
         }
@@ -388,7 +388,7 @@ class BladeLint extends Command
                 continue;
             }
 
-            pcntl_signal($i, [$this, 'signalHandler'], false);
+            pcntl_signal($i, array($this, 'signalHandler'), false);
         }
     }
 
