@@ -14,7 +14,7 @@ Laravel console command to check syntax of blade templates.
 
 Perhaps it works with lesser versions as well, but this is untested.
 
-- PHP 5.6 or above
+- PHP 5.6 or above, with at least the [PCNTL extension](https://www.php.net/manual/en/book.pcntl.php)
 - Laravel 5.4 or above
 
 # Installation
@@ -33,6 +33,10 @@ the `providers` array:
 From the command line, run:
 
     php artisan blade:lint
+
+It attempts to determine automatically the number of CPU cores that your
+system has and to use all cores by starting child worker processes
+(requires the [PHP POSIX extension](https://www.php.net/manual/en/book.posix.php)).
 
 You can use different levels of verbosity for somewhat more detailed
 information.
