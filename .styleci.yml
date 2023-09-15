@@ -1,0 +1,34 @@
+risky: false
+version: 7
+preset: psr12
+tab-width: 4
+use-tabs: false
+monolithic: true
+
+enabled:
+  - align_double_arrow_minimal
+  - align_equals_minimal
+  - alpha_ordered_imports
+  - integer_literal_case
+  - laravel_braces
+  - laravel_phpdoc_alignment
+  - long_array_syntax
+  - no_empty_comment
+  - no_extra_consecutive_blank_lines
+
+disabled:
+  #- align_double_arrow
+
+finder:
+  exclude:
+    - "modules"
+    - "node_modules"
+    - "nova"
+    - "nova-components"
+    - "storage"
+    - "spark"
+    - "vendor"
+  name: "*.php"
+  not-name:
+    - "*.blade.php"
+    - "_ide_helper.php"
