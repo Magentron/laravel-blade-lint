@@ -63,10 +63,13 @@ class BladeLint extends Command
         $this->info('Blade Lint by Jeroen Derks Copyright © 2017-2018,2023 GPLv3+ License');
 
         // get blade files
-        $blades       = $this->getBladeFileSizes();
-        $processCount = $this->getProcessCount();
+        $blades = $this->getBladeFileSizes();
+        $count  = count($blades);
 
-        $count   = count($blades);
+        // determine number of process to use
+        /** @var int $processCount */
+        $processCount = (int)min($count, $this->getProcessCount());
+
         $message = sprintf('Found %u blade templates, processing now...%s', $count, (1 < $processCount ? " [{$processCount} processes]" : ''));
         $this->info($message, OutputInterface::VERBOSITY_VERBOSE);
 
