@@ -12,6 +12,8 @@
 
 namespace Magentron\BladeLint\Console\Commands;
 
+use ErrorException;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Blade;
@@ -103,7 +105,7 @@ class BladeLint extends Command
         $verbosityLevel = $this->getOutput()->getVerbosity();
 
         if (OutputInterface::VERBOSITY_VERBOSE < $verbosityLevel) {
-            $this->output->write('Searching for template files in view directories  :', true, OutputInterface::VERBOSITY_VERBOSE);
+            $this->output->write('Searching for template files in view directories:', true, OutputInterface::VERBOSITY_VERBOSE);
         } else {
             $this->output->write('Searching for template files...', false, OutputInterface::VERBOSITY_VERBOSE);
         }
@@ -224,20 +226,44 @@ class BladeLint extends Command
 
             $this->output->{$writeNewlineFunction}($message, false, OutputInterface::VERBOSITY_VERBOSE);
 
+            $compiled = '';
+            $output   = '';
+
             // compile the file and send it to the linter process
-            $contents = @file_get_contents($file);
-            $compiled = false === $contents ? '' : Blade::compileString($contents);
-            if ($this->input->getOption('debug')) {
-                $this->comment($compiled, OutputInterface::VERBOSITY_QUIET);
+            try {
+                $contents = file_get_contents($file);
+
+                $compiled = false === $contents ? '' : Blade::compileString($contents);
+            } catch (ErrorException $e) {
+                // handle file reading error
+                $message = preg_replace('/^file_get_contents\(.*?\)/', '', $e->getMessage());
+                $output  = "{$file}: {$message}";
+            } catch (Exception $e) {
+                // handle compilation error (or any other exception)
+                $output = "{$file}: {$e->getMessage()}";
             }
 
-            $output = $error = '';
-            if (! $this->lint($compiled, $output, $error)) {
+            if ('' === $output) {
+                // if successfull compiled blade template, run the PHP linter
+                if ($this->input->getOption('debug')) {
+                    $this->comment($compiled, OutputInterface::VERBOSITY_QUIET);
+                }
+
+                $error = '';
+                if (! $this->lint($compiled, $output, $error)) {
+                    $line             = (string)strtok(trim($output), "\n");
+                    $output           = str_replace('Standard input code', $file, $line);
+                    $maxMessageLength = 0;
+                } else {
+                    $output = '';
+                }
+            }
+
+            // if there is output, it is an error
+            if ('' !== $output) {
                 ++$errorCount;
-                $line   = (string)strtok(trim($output), "\n");
-                $output = str_replace('Standard input code', $file, $line);
+
                 $this->error($output, OutputInterface::VERBOSITY_QUIET);
-                $maxMessageLength = 0;
             }
         }
 
