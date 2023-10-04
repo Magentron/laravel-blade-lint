@@ -45,6 +45,36 @@ system has and to use all cores by starting child worker processes
 You can use different levels of verbosity for somewhat more detailed
 information.
 
+Standard help output:
+
+```
+$ php artisan blade:lint -h
+Description:
+  Laravel Blade Lint - syntax checking of blade templates
+
+Usage:
+  blade:lint [options] [--] [<path>...]
+
+Arguments:
+  path
+
+Options:
+      --debug                  Enable debug output, which consists of the compiled templates (PHP code)
+  -p, --processes[=PROCESSES]  The number of test processes to run. [default: "auto"]
+  -h, --help                   Display help for the given command. When no command is given display help for the list command
+  -q, --quiet                  Do not output any message
+  -V, --version                Display this application version
+      --ansi|--no-ansi         Force (or disable --no-ansi) ANSI output
+  -n, --no-interaction         Do not ask any interactive question
+      --env[=ENV]              The environment the command should run under
+  -v|vv|vvv, --verbose         Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+```
+
+# Reporting bugs/issues
+
+If you find a bug please report a bug on GitHub:<br>
+[https://github.com/Magentron/laravel-blade-lint/issues](https://github.com/Magentron/laravel-blade-lint/issues).
+
 # Author
  
 [Jeroen Derks](https://www.phpfreelancer.nl), a.k.a [Magentron](https://github.com/Magentron)
