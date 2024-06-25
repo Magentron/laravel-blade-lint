@@ -22,6 +22,10 @@ use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 
+if (!defined('SIGKILL')) {
+	define('SIGKILL', 9);
+}
+
 class BladeLint extends Command
 {
     /**
@@ -166,7 +170,7 @@ class BladeLint extends Command
         /** @var string $commandName */
         $commandName = $this->getName();
 
-        if (1 === $processCount) {
+        if (1 < $processCount) {
             $this->installSignalHandlers();
         }
 
@@ -250,7 +254,7 @@ class BladeLint extends Command
                 }
 
                 $error = '';
-                if (! $this->lint($compiled, $output, $error)) {
+                if (!$this->lint($compiled, $output, $error)) {
                     $line             = (string)strtok(trim($output), "\n");
                     $output           = str_replace('Standard input code', $file, $line);
                     $maxMessageLength = 0;
@@ -267,7 +271,7 @@ class BladeLint extends Command
             }
         }
 
-        if (! $doListFiles) {
+        if (!$doListFiles) {
             $this->output->write(str_repeat(' ', $maxMessageLength) . "\r", false, OutputInterface::VERBOSITY_VERBOSE);
         }
 
@@ -293,7 +297,7 @@ class BladeLint extends Command
         // open linter process (php -l)
         $process = proc_open('php -l', $descriptorspec, $pipes);
 
-        if (! is_resource($process)) {
+        if (!is_resource($process)) {
             throw new RuntimeException('unable to open process \'php -l\'');
         }
 
@@ -354,7 +358,7 @@ class BladeLint extends Command
             $processes = $this->getNumberOfCores();
         }
         /** @var int $processes */
-        if (1 < $processes && ! extension_loaded('posix')) {
+        if (1 < $processes && !extension_loaded('posix')) {
             $this->output->warning('PHP extension posix not loaded, multi-processing support disabled.');
             $processes = 1;
         }
