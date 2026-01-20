@@ -5,6 +5,8 @@
 [![License](http://poser.pugx.org/magentron/laravel-blade-lint/license)](https://packagist.org/packages/magentron/laravel-blade-lint)
 [![StyleCI](https://github.styleci.io/repos/134142812/shield)](https://github.styleci.io/repos/134142812)
 <br>
+[![Laravel 12.x](https://img.shields.io/badge/Laravel-12.x-green.svg)](https://github.com/laravel/framework/tree/12.x)
+[![Laravel 11.x](https://img.shields.io/badge/Laravel-11.x-green.svg)](https://github.com/laravel/framework/tree/11.x)
 [![Laravel 10.x](https://img.shields.io/badge/Laravel-10.x-green.svg)](https://github.com/laravel/framework/tree/10.x)
 [![Laravel 9.x](https://img.shields.io/badge/Laravel-9.x-green.svg)](https://github.com/laravel/framework/tree/9.x)
 [![Laravel 8.x](https://img.shields.io/badge/Laravel-8.x-green.svg)](https://github.com/laravel/framework/tree/8.x)
@@ -16,10 +18,10 @@ Laravel console command to check syntax of blade templates.
 
 # Requirements
 
-Perhaps it works with lesser versions as well, but this is untested.
-
-- PHP 5.6 or above, with at least the [PCNTL extension](https://www.php.net/manual/en/book.pcntl.php)
-- Laravel 5.4 or above
+- PHP 5.6 or above
+- Laravel 5.4 or above (including Laravel 12)
+- [PCNTL extension](https://www.php.net/manual/en/book.pcntl.php) (optional, for multi-process support)
+- [POSIX extension](https://www.php.net/manual/en/book.posix.php) (optional, for multi-process support)
 
 # Installation
 
@@ -68,6 +70,37 @@ Options:
   -n, --no-interaction         Do not ask any interactive question
       --env[=ENV]              The environment the command should run under
   -v|vv|vvv, --verbose         Increase the verbosity of messages: 1 for normal output, 2 for more verbose output and 3 for debug
+```
+
+# Development
+
+Development of this package requires PHP 8 or higher.
+
+## Running Tests
+
+```bash
+# Install dependencies
+composer install
+
+# Run tests
+make test
+
+# Run tests with coverage report
+make test-coverage
+```
+
+The coverage report will be generated in `build/coverage/`.
+
+## Static Analysis
+
+```bash
+# Run all static analysis tools
+make static-analysis
+
+# Individual tools
+make phpstan
+make psalm
+make php-cs-fixer-dry
 ```
 
 # Reporting bugs/issues

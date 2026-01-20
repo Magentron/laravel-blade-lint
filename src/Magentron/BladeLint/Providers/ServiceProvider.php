@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Copyright (c) 2017-2018 Derks.IT / Jeroen Derks <jeroen@derks.it> All rights reserved.
  * Unauthorized copying of this file, via any medium is strictly prohibited.
@@ -14,6 +15,9 @@ namespace Magentron\BladeLint\Providers;
 
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
 
+/**
+ * @psalm-suppress UnusedClass - Laravel service provider loaded via package discovery
+ */
 class ServiceProvider extends BaseServiceProvider
 {
     /**
@@ -27,6 +31,8 @@ class ServiceProvider extends BaseServiceProvider
      * Register the service provider.
      *
      * @return void
+     *
+     * @psalm-suppress MissingOverrideAttribute - Override attribute requires PHP 8.3+
      */
     public function register()
     {

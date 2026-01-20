@@ -22,3 +22,21 @@ Homestead.json
 # magentron/laravel-blade-lint
 .php_cs.cache
 composer.lock
+
+# Test fixtures
+tests/fixtures/**/*.blade.php
+tests/fixtures/**/*.php
+
+# PHPUnit
+.phpunit.cache/
+.phpunit.result.cache
+build/
+coverage.xml
+coverage-report/
+
+# IDE
+.idea/
+
+# Claude
+.claude/
+.claudex/

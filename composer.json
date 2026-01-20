@@ -22,20 +22,32 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-		"ext-pcntl": "*",
 		"laravel/framework": "*"
 	},
+    "suggest": {
+        "ext-pcntl": "Required for multi-process support",
+        "ext-posix": "Required for multi-process support"
+    },
     "require-dev": {
+		"php": "^8",
         "barryvdh/laravel-ide-helper": "*",
         "friendsofphp/php-cs-fixer": "*",
+        "mockery/mockery": "*",
+        "orchestra/testbench": "*",
         "phpmd/phpmd": "*",
         "phpstan/phpstan": "*",
-        "sebastian/phpcpd": "*",
+        "phpunit/phpunit": "*",
+        "systemsdk/phpcpd": "^8.0",
         "vimeo/psalm": "*"
     },
 	"autoload": {
 		"psr-4": {
 			"Magentron\\BladeLint\\": "src/Magentron/BladeLint"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Magentron\\BladeLint\\Tests\\": "tests/"
 		}
 	},
 	"extra": {

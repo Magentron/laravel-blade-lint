@@ -1,6 +1,7 @@
 <?php
+
 /**
- * Copyright (c) 2017-2018,2023 Derks.IT / Jeroen Derks <jeroen@derks.it> All rights reserved.
+ * Copyright (c) 2017-2026 Derks.IT / Jeroen Derks <jeroen@derks.it> All rights reserved.
  * Unauthorized copying of this file, via any medium is strictly prohibited.
  * Proprietary and confidential.
  *
@@ -22,10 +23,15 @@ use RuntimeException;
 use SplFileInfo;
 use Symfony\Component\Console\Output\OutputInterface;
 
-if (!defined('SIGKILL')) {
-	define('SIGKILL', 9);
+if (! defined('SIGKILL')) {
+    // @codeCoverageIgnoreStart
+    define('SIGKILL', 9);
+    // @codeCoverageIgnoreEnd
 }
 
+/**
+ * @psalm-suppress UnusedClass - Laravel command loaded via service provider
+ */
 class BladeLint extends Command
 {
     /**
@@ -63,6 +69,8 @@ class BladeLint extends Command
      * Execute the console command.
      *
      * @return mixed
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function handle()
     {
@@ -73,7 +81,6 @@ class BladeLint extends Command
         $count  = count($blades);
 
         // determine number of process to use
-        /** @var int $processCount */
         $processCount = (int)min($count, $this->getProcessCount());
 
         $message = sprintf('Found %u blade templates, processing now...%s', $count, (1 < $processCount ? " [{$processCount} processes]" : ''));
@@ -83,10 +90,12 @@ class BladeLint extends Command
         $errorCount = $this->checkBladeSyntaxFiles($blades);
         if (0 === $errorCount) {
             $this->info('All Blade templates OK! ');
-        } else {
-            $message = sprintf('Found %u errors in Blade templates! ', $errorCount);
-            $this->error($message);
+
+            return 0;
         }
+
+        $message = sprintf('Found %u errors in Blade templates! ', $errorCount);
+        $this->error($message);
 
         return $errorCount;
     }
@@ -95,6 +104,9 @@ class BladeLint extends Command
      * Get blade template path names.
      *
      * @return int[]
+     *
+     * @SuppressWarnings("PHPMD.ElseExpression")
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     protected function getBladeFileSizes()
     {
@@ -146,6 +158,9 @@ class BladeLint extends Command
      *
      * @param  int[] $blades
      * @return int   Number of files with syntax errors.
+     *
+     * @SuppressWarnings("PHPMD.ElseExpression")
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     protected function checkBladeSyntaxFiles(array $blades)
     {
@@ -210,14 +225,16 @@ class BladeLint extends Command
      * @param  string[] $files
      * @param  int      $maxLength
      * @return int
+     *
+     * @SuppressWarnings("PHPMD.ElseExpression")
+     * @SuppressWarnings("PHPMD.StaticAccess")
      */
     protected function processFiles($files, $maxLength)
     {
-        $errorCount           = 0;
-        $maxMessageLength     = 0;
-        $verbosityLevel       = $this->getOutput()->getVerbosity();
-        $doListFiles          = OutputInterface::VERBOSITY_VERBOSE < $verbosityLevel;
-        $writeNewlineFunction = $doListFiles ? 'writeln' : 'write';
+        $errorCount       = 0;
+        $maxMessageLength = 0;
+        $verbosityLevel   = $this->getOutput()->getVerbosity();
+        $doListFiles      = OutputInterface::VERBOSITY_VERBOSE < $verbosityLevel;
 
         foreach ($files as $file) {
             $length        = $maxLength - strlen($file);
@@ -228,7 +245,11 @@ class BladeLint extends Command
                 $maxMessageLength = $messageLength;
             }
 
-            $this->output->{$writeNewlineFunction}($message, false, OutputInterface::VERBOSITY_VERBOSE);
+            if ($doListFiles) {
+                $this->output->writeln($message, OutputInterface::VERBOSITY_VERBOSE);
+            } else {
+                $this->output->write($message, false, OutputInterface::VERBOSITY_VERBOSE);
+            }
 
             $compiled = '';
             $output   = '';
@@ -254,8 +275,8 @@ class BladeLint extends Command
                 }
 
                 $error = '';
-                if (!$this->lint($compiled, $output, $error)) {
-                    $line             = (string)strtok(trim($output), "\n");
+                if (! $this->lint($compiled, $output, $error)) {
+                    $line             = (string)strtok(trim(false === $output ? '' : $output), "\n");
                     $output           = str_replace('Standard input code', $file, $line);
                     $maxMessageLength = 0;
                 } else {
@@ -271,7 +292,7 @@ class BladeLint extends Command
             }
         }
 
-        if (!$doListFiles) {
+        if (! $doListFiles) {
             $this->output->write(str_repeat(' ', $maxMessageLength) . "\r", false, OutputInterface::VERBOSITY_VERBOSE);
         }
 
@@ -281,9 +302,9 @@ class BladeLint extends Command
     /**
      * Lint the given PHP code.
      *
-     * @param  string $code   The PHP code you want to lint.
-     * @param  string $stdout The output produced by PHP internal linter.
-     * @param  string $stderr The errors produced by PHP internal linter.
+     * @param  string       $code   The PHP code you want to lint.
+     * @param  string|false $stdout The output produced by PHP internal linter.
+     * @param  string|false $stderr The errors produced by PHP internal linter.
      * @return bool
      */
     protected function lint($code, &$stdout, &$stderr)
@@ -296,8 +317,7 @@ class BladeLint extends Command
 
         // open linter process (php -l)
         $process = proc_open('php -l', $descriptorspec, $pipes);
-
-        if (!is_resource($process)) {
+        if (! is_resource($process)) {
             throw new RuntimeException('unable to open process \'php -l\'');
         }
 
@@ -344,9 +364,16 @@ class BladeLint extends Command
      * Retrieve the number of child worker processes to use (1 = no child worker processes).
      *
      * @return int
+     *
+     * @SuppressWarnings("PHPMD.ElseExpression")
      */
     protected function getProcessCount()
     {
+        // return cached value if already determined
+        if (null !== $this->processCount) {
+            return $this->processCount;
+        }
+
         // determine the number of processes
         $processes = $this->option('processes');
         if (is_numeric($processes)) {
@@ -354,14 +381,23 @@ class BladeLint extends Command
         } else {
             $processes = null;
         }
+
         if (0 >= $processes) {
             $processes = $this->getNumberOfCores();
         }
+
         /** @var int $processes */
-        if (1 < $processes && !extension_loaded('posix')) {
+        if (1 < $processes && ! extension_loaded('pcntl')) {
+            $this->output->warning('PHP extension pcntl not loaded, multi-processing support disabled.');
+            $processes = 1;
+        }
+
+        if (1 < $processes && ! extension_loaded('posix')) {
             $this->output->warning('PHP extension posix not loaded, multi-processing support disabled.');
             $processes = 1;
         }
+
+        $this->processCount = $processes;
 
         return $processes;
     }
@@ -372,11 +408,14 @@ class BladeLint extends Command
      * @return int
      *
      * @see https://gist.github.com/ezzatron/1321581
+     *
+     * @SuppressWarnings("PHPMD.ElseExpression")
+     * @SuppressWarnings("PHPMD.ErrorControlOperator")
      */
     protected function getNumberOfCores()
     {
         if (is_file('/proc/cpuinfo')) {
-            $cpuinfo = @file_get_contents('/proc/cpuinfo');
+            $cpuinfo = file_get_contents('/proc/cpuinfo');
             if (false !== $cpuinfo && preg_match_all('/^processor/m', $cpuinfo, $matches)) {
                 return count($matches[0]);
             }
@@ -433,7 +472,11 @@ class BladeLint extends Command
      * @param int   $signo
      * @param mixed $siginfo
      *
-     * @return void
+     * @return never
+     *
+     * @psalm-suppress PossiblyUnusedParam - Parameters required by pcntl_signal callback signature
+     * @SuppressWarnings("PHPMD.ExitExpression")
+     * @SuppressWarnings("PHPMD.UnusedFormalParameter")
      */
     public function signalHandler($signo, $siginfo)
     {
@@ -447,6 +490,8 @@ class BladeLint extends Command
      *
      * @param  bool $doKill
      * @return int
+     *
+     * @SuppressWarnings("PHPMD.BooleanArgumentFlag")
      */
     protected function waitForWorkers($doKill = false)
     {
