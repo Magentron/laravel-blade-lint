@@ -157,7 +157,7 @@ class BladeLint extends Command
             }
 
             return $maxLength;
-        });
+        }, 0);
 
         $chunkedBlades = $this->splitBladesIntoChunks($blades);
         $processCount  = count($chunkedBlades);
@@ -388,7 +388,9 @@ class BladeLint extends Command
 
                 pclose($process);
 
-                return $numCpus;
+                if ($numCpus > 0) {
+                    return $numCpus;
+                }
             }
         } elseif ('Darwin' === PHP_OS) {
             return (int)exec('sysctl -n hw.ncpu');
@@ -400,7 +402,7 @@ class BladeLint extends Command
                 pclose($process);
 
                 if (false !== $output && preg_match('/hw.ncpu: (\d+)/', $output, $matches)) {
-                    return intval($matches[1][0]);
+                    return intval($matches[1]);
                 }
             }
         }

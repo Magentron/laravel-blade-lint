@@ -30,7 +30,7 @@ Add package via composer:
 For Laravel version < 5.5, edit `config/app.php`, add the following to
 the `providers` array:
 
-    Magentron\BladeLinter\Providers\ServiceProvider::class,
+    Magentron\BladeLint\Providers\ServiceProvider::class,
 
 # Usage
 
